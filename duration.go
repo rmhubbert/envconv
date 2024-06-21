@@ -4,6 +4,16 @@ import (
 	"time"
 )
 
+// convertduration converts the passed string to a time.Duration. It will
+// also return an error, if applicable.
+func convertDuration(value string) (time.Duration, error) {
+	convertedValue, err := time.ParseDuration(value)
+	if err != nil {
+		return 0, err
+	}
+	return convertedValue, nil
+}
+
 // ToDuration returns the value of the requested environment variable
 // converted to a time.Duration. An error will be returned if the
 // environment variable is not found or the conversion to
@@ -32,14 +42,4 @@ func ToDurationWithDefault(varName string, defaultValue time.Duration) time.Dura
 		return defaultValue
 	}
 	return convertedValue
-}
-
-// convertduration converts the passed string to a time.Duration. It will
-// also return an error, if applicable.
-func convertDuration(value string) (time.Duration, error) {
-	convertedValue, err := time.ParseDuration(value)
-	if err != nil {
-		return 0, err
-	}
-	return convertedValue, nil
 }

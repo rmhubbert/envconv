@@ -5,6 +5,16 @@ import (
 	"strings"
 )
 
+// convertBool converts the passed string to a bool. It will
+// also return an error, if applicable.
+func convertBool(value string) (bool, error) {
+	convertedValue, err := strconv.ParseBool(strings.ToLower(value))
+	if err != nil {
+		return false, err
+	}
+	return convertedValue, nil
+}
+
 // ToBool returns the value of the requested environment variable
 // converted to a boolean. An error will be returned if the
 // environment variable is not found or the conversion to
@@ -34,14 +44,4 @@ func ToBoolWithDefault(varName string, defaultValue bool) bool {
 		return defaultValue
 	}
 	return convertedValue
-}
-
-// convertBool converts the passed string to a bool. It will
-// also return an error, if applicable.
-func convertBool(value string) (bool, error) {
-	convertedValue, err := strconv.ParseBool(strings.ToLower(value))
-	if err != nil {
-		return false, err
-	}
-	return convertedValue, nil
 }
