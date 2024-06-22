@@ -207,6 +207,30 @@ func TestToInt16(t *testing.T) {
 	runEmptyTest(t, int16(0), envconv.ToInt16)
 }
 
+func TestToInt16Slice(t *testing.T) {
+	testData := []struct {
+		env         string
+		value       string
+		separator   string
+		expected    []int16
+		errExpected bool
+	}{
+		{"TEST_INT16_SLICE_123_COMMA", "1,2,3", ",", []int16{1, 2, 3}, false},
+		{"TEST_INT16_SLICE_123_COMMA_SPACE", "1, 2, 3", ",", []int16{1, 2, 3}, false},
+		{"TEST_INT16_SLICE_123_SPACE", "1 2 3", ",", []int16{}, true},
+		{"TEST_INT16_SLICE_32767", "32767,2,3", ",", []int16{32767, 2, 3}, false},
+		{"TEST_INT16_SLICE_32768", "32768,2,3", ",", []int16{}, true},
+		{"TEST_INT16_SLICE_-32768", "-32768,2,3", ",", []int16{-32768, 2, 3}, false},
+		{"TEST_INT16_SLICE_-32769", "-32769,2,3", ",", []int16{}, true},
+		{"TEST_INT16_SLICE_NOTANUMBER", "1,2,notanumber,4", ",", []int16{}, true},
+	}
+
+	for _, td := range testData {
+		runSliceTest(t, td.env, td.value, td.separator, td.expected, td.errExpected, envconv.ToInt16Slice)
+	}
+	runSliceEmptyTest[int16](t, ",", []int16{}, envconv.ToInt16Slice)
+}
+
 func TestToInt16WithDefault(t *testing.T) {
 	testData := []struct {
 		env          string
@@ -226,6 +250,30 @@ func TestToInt16WithDefault(t *testing.T) {
 		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToInt16WithDefault)
 	}
 	runWithDefaultEmptyTest(t, int16(0), envconv.ToInt16WithDefault)
+}
+
+func TestToInt16SliceWithDefault(t *testing.T) {
+	testData := []struct {
+		env          string
+		value        string
+		separator    string
+		expected     []int16
+		defaultValue []int16
+	}{
+		{"TEST_INT16_SLICE_WITH_DEFAULT_123_COMMA", "1,2,3", ",", []int16{1, 2, 3}, []int16{1, 0, 5}},
+		{"TEST_INT16_SLICE_WITH_DEFAULT_123_COMMA_SPACE", "1, 2, 3", ",", []int16{1, 2, 3}, []int16{1, 0, 5}},
+		{"TEST_INT16_SLICE_WITH_DEFAULT_123_SPACE", "1 2 3", ",", []int16{}, []int16{1, 0, 5}},
+		{"TEST_INT16_SLICE_WITH_DEFAULT_32767", "32767,2,3", ",", []int16{32767, 2, 3}, []int16{1, 0, 5}},
+		{"TEST_INT16_SLICE_WITH_DEFAULT_32768", "32768,2,3", ",", []int16{}, []int16{1, 0, 5}},
+		{"TEST_INT16_SLICE_WITH_DEFAULT_-32768", "-32768,2,3", ",", []int16{-32768, 2, 3}, []int16{1, 0, 5}},
+		{"TEST_INT16_SLICE_WITH_DEFAULT_-32769", "-32769,2,3", ",", []int16{}, []int16{1, 0, 5}},
+		{"TEST_INT16_SLICE_WITH_DEFAULT_NOTANUMBER", "1,2,notanumber,4", ",", []int16{}, []int16{1, 0, 5}},
+	}
+
+	for _, td := range testData {
+		runSliceWithDefaultTest(t, td.env, td.value, td.separator, td.expected, td.defaultValue, envconv.ToInt16SliceWithDefault)
+	}
+	runSliceWithDefaultEmptyTest[int16](t, ",", []int16{1, 0, 5}, envconv.ToInt16SliceWithDefault)
 }
 
 func TestToInt32(t *testing.T) {
@@ -249,6 +297,30 @@ func TestToInt32(t *testing.T) {
 	runEmptyTest(t, int32(0), envconv.ToInt32)
 }
 
+func TestToInt32Slice(t *testing.T) {
+	testData := []struct {
+		env         string
+		value       string
+		separator   string
+		expected    []int32
+		errExpected bool
+	}{
+		{"TEST_INT32_SLICE_123_COMMA", "1,2,3", ",", []int32{1, 2, 3}, false},
+		{"TEST_INT32_SLICE_123_COMMA_SPACE", "1, 2, 3", ",", []int32{1, 2, 3}, false},
+		{"TEST_INT32_SLICE_123_SPACE", "1 2 3", ",", []int32{}, true},
+		{"TEST_INT32_SLICE_2147483647", "2147483647,2,3", ",", []int32{2147483647, 2, 3}, false},
+		{"TEST_INT32_SLICE_2147483648", "2147483648,2,3", ",", []int32{}, true},
+		{"TEST_INT32_SLICE_-2147483648", "-2147483648,2,3", ",", []int32{-2147483648, 2, 3}, false},
+		{"TEST_INT32_SLICE_-2147483649", "-2147483649,2,3", ",", []int32{}, true},
+		{"TEST_INT32_SLICE_NOTANUMBER", "1,2,notanumber,4", ",", []int32{}, true},
+	}
+
+	for _, td := range testData {
+		runSliceTest(t, td.env, td.value, td.separator, td.expected, td.errExpected, envconv.ToInt32Slice)
+	}
+	runSliceEmptyTest[int32](t, ",", []int32{}, envconv.ToInt32Slice)
+}
+
 func TestToInt32WithDefault(t *testing.T) {
 	testData := []struct {
 		env          string
@@ -268,6 +340,30 @@ func TestToInt32WithDefault(t *testing.T) {
 		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToInt32WithDefault)
 	}
 	runWithDefaultEmptyTest(t, int32(0), envconv.ToInt32WithDefault)
+}
+
+func TestToInt32SliceWithDefault(t *testing.T) {
+	testData := []struct {
+		env          string
+		value        string
+		separator    string
+		expected     []int32
+		defaultValue []int32
+	}{
+		{"TEST_INT32_SLICE_WITH_DEFAULT_123_COMMA", "1,2,3", ",", []int32{1, 2, 3}, []int32{1, 0, 5}},
+		{"TEST_INT32_SLICE_WITH_DEFAULT_123_COMMA_SPACE", "1, 2, 3", ",", []int32{1, 2, 3}, []int32{1, 0, 5}},
+		{"TEST_INT32_SLICE_WITH_DEFAULT_123_SPACE", "1 2 3", ",", []int32{}, []int32{1, 0, 5}},
+		{"TEST_INT32_SLICE_WITH_DEFAULT_2147483647", "2147483647,2,3", ",", []int32{2147483647, 2, 3}, []int32{1, 0, 5}},
+		{"TEST_INT32_SLICE_WITH_DEFAULT_2147483648", "2147483648,2,3", ",", []int32{}, []int32{1, 0, 5}},
+		{"TEST_INT32_SLICE_WITH_DEFAULT_-2147483648", "-2147483648,2,3", ",", []int32{-2147483648, 2, 3}, []int32{1, 0, 5}},
+		{"TEST_INT32_SLICE_WITH_DEFAULT_-2147483649", "-2147483649,2,3", ",", []int32{}, []int32{1, 0, 5}},
+		{"TEST_INT32_SLICE_WITH_DEFAULT_NOTANUMBER", "1,2,notanumber,4", ",", []int32{}, []int32{1, 0, 5}},
+	}
+
+	for _, td := range testData {
+		runSliceWithDefaultTest(t, td.env, td.value, td.separator, td.expected, td.defaultValue, envconv.ToInt32SliceWithDefault)
+	}
+	runSliceWithDefaultEmptyTest[int32](t, ",", []int32{1, 0, 5}, envconv.ToInt32SliceWithDefault)
 }
 
 func TestToInt64(t *testing.T) {
@@ -291,6 +387,30 @@ func TestToInt64(t *testing.T) {
 	runEmptyTest(t, int64(0), envconv.ToInt64)
 }
 
+func TestToInt64Slice(t *testing.T) {
+	testData := []struct {
+		env         string
+		value       string
+		separator   string
+		expected    []int64
+		errExpected bool
+	}{
+		{"TEST_INT64_SLICE_123_COMMA", "1,2,3", ",", []int64{1, 2, 3}, false},
+		{"TEST_INT64_SLICE_123_COMMA_SPACE", "1, 2, 3", ",", []int64{1, 2, 3}, false},
+		{"TEST_INT64_SLICE_123_SPACE", "1 2 3", ",", []int64{}, true},
+		{"TEST_INT64_SLICE_9223372036854775807", "9223372036854775807,2,3", ",", []int64{9223372036854775807, 2, 3}, false},
+		{"TEST_INT64_SLICE_9223372036854775808", "9223372036854775808,2,3", ",", []int64{}, true},
+		{"TEST_INT64_SLICE_-9223372036854775808", "-9223372036854775808,2,3", ",", []int64{-9223372036854775808, 2, 3}, false},
+		{"TEST_INT64_SLICE_9223372036854775809", "9223372036854775809,2,3", ",", []int64{}, true},
+		{"TEST_INT64_SLICE_NOTANUMBER", "1,2,notanumber,4", ",", []int64{}, true},
+	}
+
+	for _, td := range testData {
+		runSliceTest(t, td.env, td.value, td.separator, td.expected, td.errExpected, envconv.ToInt64Slice)
+	}
+	runSliceEmptyTest[int64](t, ",", []int64{}, envconv.ToInt64Slice)
+}
+
 func TestToInt64WithDefault(t *testing.T) {
 	testData := []struct {
 		env          string
@@ -310,4 +430,28 @@ func TestToInt64WithDefault(t *testing.T) {
 		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToInt64WithDefault)
 	}
 	runWithDefaultEmptyTest(t, int64(0), envconv.ToInt64WithDefault)
+}
+
+func TestToInt64SliceWithDefault(t *testing.T) {
+	testData := []struct {
+		env          string
+		value        string
+		separator    string
+		expected     []int64
+		defaultValue []int64
+	}{
+		{"TEST_INT64_SLICE_WITH_DEFAULT_123_COMMA", "1,2,3", ",", []int64{1, 2, 3}, []int64{1, 0, 5}},
+		{"TEST_INT64_SLICE_WITH_DEFAULT_123_COMMA_SPACE", "1, 2, 3", ",", []int64{1, 2, 3}, []int64{1, 0, 5}},
+		{"TEST_INT64_SLICE_WITH_DEFAULT_123_SPACE", "1 2 3", ",", []int64{}, []int64{1, 0, 5}},
+		{"TEST_INT64_SLICE_WITH_DEFAULT_9223372036854775807", "9223372036854775807,2,3", ",", []int64{9223372036854775807, 2, 3}, []int64{1, 0, 5}},
+		{"TEST_INT64_SLICE_WITH_DEFAULT_9223372036854775808", "9223372036854775808,2,3", ",", []int64{}, []int64{1, 0, 5}},
+		{"TEST_INT64_SLICE_WITH_DEFAULT_-9223372036854775808", "-9223372036854775808,2,3", ",", []int64{-9223372036854775808, 2, 3}, []int64{1, 0, 5}},
+		{"TEST_INT64_SLICE_WITH_DEFAULT_-9223372036854775809", "-9223372036854775809,2,3", ",", []int64{}, []int64{1, 0, 5}},
+		{"TEST_INT64_SLICE_WITH_DEFAULT_NOTANUMBER", "1,2,notanumber,4", ",", []int64{}, []int64{1, 0, 5}},
+	}
+
+	for _, td := range testData {
+		runSliceWithDefaultTest(t, td.env, td.value, td.separator, td.expected, td.defaultValue, envconv.ToInt64SliceWithDefault)
+	}
+	runSliceWithDefaultEmptyTest[int64](t, ",", []int64{1, 0, 5}, envconv.ToInt64SliceWithDefault)
 }

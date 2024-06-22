@@ -164,12 +164,28 @@ func ToInt16(varName string) (int16, error) {
 	return toIntType[int16](varName, 16, strconv.ParseInt)
 }
 
+// ToInt16Slice returns the value of the requested environment variable
+// converted to a slice of int16s. An error will be returned if the
+// environment variable is not found or the conversion to
+// slice of int16s fails.
+func ToInt16Slice(varName string, separator string) ([]int16, error) {
+	return toIntSliceType[int16](varName, separator, 16, strconv.ParseInt)
+}
+
 // ToInt16WithDefault returns the value of the requested environment
 // variable converted to an int16. The default value passed as
 // the second parameter will be returned if the environment
 // variable is not found or the conversion to int16 fails.
 func ToInt16WithDefault(varName string, defaultValue int16) int16 {
 	return toIntTypeWithDefault[int16](varName, defaultValue, 16, strconv.ParseInt)
+}
+
+// ToInt16SliceWithDefault returns the value of the requested environment
+// variable converted to a slice of int16s. The default value passed as
+// the second parameter will be returned if the environment
+// variable is not found or the conversion to a slice of int16s fails.
+func ToInt16SliceWithDefault(varName string, separator string, defaultValue []int16) []int16 {
+	return toIntSliceTypeWithDefault[int16](varName, separator, defaultValue, 16, strconv.ParseInt)
 }
 
 // ToInt32 returns the value of the requested environment variable
@@ -180,12 +196,28 @@ func ToInt32(varName string) (int32, error) {
 	return toIntType[int32](varName, 32, strconv.ParseInt)
 }
 
+// ToInt32Slice returns the value of the requested environment variable
+// converted to a slice of int32s. An error will be returned if the
+// environment variable is not found or the conversion to
+// slice of int32s fails.
+func ToInt32Slice(varName string, separator string) ([]int32, error) {
+	return toIntSliceType[int32](varName, separator, 32, strconv.ParseInt)
+}
+
 // ToInt32WithDefault returns the value of the requested environment
 // variable converted to an int32. The default value passed as
 // the second parameter will be returned if the environment
 // variable is not found or the conversion to int32 fails.
 func ToInt32WithDefault(varName string, defaultValue int32) int32 {
 	return toIntTypeWithDefault[int32](varName, defaultValue, 32, strconv.ParseInt)
+}
+
+// ToInt32SliceWithDefault returns the value of the requested environment
+// variable converted to a slice of int32s. The default value passed as
+// the second parameter will be returned if the environment
+// variable is not found or the conversion to a slice of int32s fails.
+func ToInt32SliceWithDefault(varName string, separator string, defaultValue []int32) []int32 {
+	return toIntSliceTypeWithDefault[int32](varName, separator, defaultValue, 32, strconv.ParseInt)
 }
 
 // ToInt64 returns the value of the requested environment variable
@@ -196,10 +228,26 @@ func ToInt64(varName string) (int64, error) {
 	return toIntType[int64](varName, 64, strconv.ParseInt)
 }
 
+// ToInt64Slice returns the value of the requested environment variable
+// converted to a slice of int64s. An error will be returned if the
+// environment variable is not found or the conversion to
+// slice of int64s fails.
+func ToInt64Slice(varName string, separator string) ([]int64, error) {
+	return toIntSliceType[int64](varName, separator, 64, strconv.ParseInt)
+}
+
 // ToInt64WithDefault returns the value of the requested environment
 // variable converted to an int64. The default value passed as
 // the second parameter will be returned if the environment
 // variable is not found or the conversion to int64 fails.
 func ToInt64WithDefault(varName string, defaultValue int64) int64 {
 	return toIntTypeWithDefault[int64](varName, defaultValue, 64, strconv.ParseInt)
+}
+
+// ToInt64SliceWithDefault returns the value of the requested environment
+// variable converted to a slice of int64s. The default value passed as
+// the second parameter will be returned if the environment
+// variable is not found or the conversion to a slice of int64s fails.
+func ToInt64SliceWithDefault(varName string, separator string, defaultValue []int64) []int64 {
+	return toIntSliceTypeWithDefault[int64](varName, separator, defaultValue, 64, strconv.ParseInt)
 }
