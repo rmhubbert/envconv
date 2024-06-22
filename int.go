@@ -6,15 +6,15 @@ import (
 )
 
 // Type intType is a convenience interface to wrap all of the possible int types
-type IntType interface {
+type intType interface {
 	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64
 }
 
-// toIntType returns the value of the requested environment variable
+// tointType returns the value of the requested environment variable
 // converted to type T. An error will be returned if the
 // environment variable is not found or the conversion to
 // type T fails.
-func toIntType[T IntType, RT int64 | uint64](varName string, bitSize int, conversionFunc func(string, int, int) (RT, error)) (T, error) {
+func toIntType[T intType, RT int64 | uint64](varName string, bitSize int, conversionFunc func(string, int, int) (RT, error)) (T, error) {
 	value, err := LoadFromEnvironment(varName, true)
 	if err != nil {
 		return T(0), err
@@ -32,7 +32,7 @@ func toIntType[T IntType, RT int64 | uint64](varName string, bitSize int, conver
 // converted to type []T. An error will be returned if the
 // environment variable is not found or the conversion to
 // type []T fails.
-func toIntSliceType[T IntType, RT int64 | uint64](varName string, separator string, bitSize int, conversionFunc func(string, int, int) (RT, error)) ([]T, error) {
+func toIntSliceType[T intType, RT int64 | uint64](varName string, separator string, bitSize int, conversionFunc func(string, int, int) (RT, error)) ([]T, error) {
 	value, err := LoadFromEnvironment(varName, true)
 	if err != nil {
 		return []T{}, err
@@ -55,7 +55,7 @@ func toIntSliceType[T IntType, RT int64 | uint64](varName string, separator stri
 // variable converted to type T. The default value passed as the
 // second parameter will be returned if the environmentvariable
 // is not found or the conversion to type T fails.
-func toIntTypeWithDefault[T IntType, RT int64 | uint64](varName string, defaultValue T, bitSize int, conversionFunc func(string, int, int) (RT, error)) T {
+func toIntTypeWithDefault[T intType, RT int64 | uint64](varName string, defaultValue T, bitSize int, conversionFunc func(string, int, int) (RT, error)) T {
 	value, err := LoadFromEnvironment(varName, true)
 	if err != nil {
 		return defaultValue
@@ -73,7 +73,7 @@ func toIntTypeWithDefault[T IntType, RT int64 | uint64](varName string, defaultV
 // converted to type []T. The default value passed as the second
 // parameter will be returned if the environment variable is
 // not found or the conversion to type []T fails.
-func toIntSliceTypeWithDefault[T IntType, RT int64 | uint64](varName string, separator string, defaultValue []T, bitSize int, conversionFunc func(string, int, int) (RT, error)) []T {
+func toIntSliceTypeWithDefault[T intType, RT int64 | uint64](varName string, separator string, defaultValue []T, bitSize int, conversionFunc func(string, int, int) (RT, error)) []T {
 	value, err := LoadFromEnvironment(varName, true)
 	if err != nil {
 		return defaultValue
