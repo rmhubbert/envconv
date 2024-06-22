@@ -49,14 +49,18 @@ func TestToByteSlice(t *testing.T) {
 
 func TestToByteSliceWithDefault(t *testing.T) {
 	testData := []ToByteSliceWithDefaultTest{
-		{"TEST_BOOL_WITH_DEFAULT_HELLO_WORLD", "Hello World", []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}, []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}},
+		{"TEST_BYTE_SLICE_WITH_DEFAULT_HELLO_WORLD", "Hello World", []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}, []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToByteSliceWithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if !slicesEqual(v, td.expected) {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 

@@ -34,3 +34,21 @@ func TestLoadFromEnvironment(t *testing.T) {
 		})
 	}
 }
+
+type sliceType interface {
+	~string | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+func slicesEqual[T sliceType](a, b []T) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
