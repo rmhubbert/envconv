@@ -1,6 +1,9 @@
 package envconv
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 // Type intType is a convenience interface to wrap all of the possible int types
 type IntType interface {
@@ -25,10 +28,33 @@ func toIntType[T IntType, RT int64 | uint64](varName string, bitSize int, conver
 	return T(convertedValue), err
 }
 
+// toIntSliceType returns the value of the requested environment variable
+// converted to type []T. An error will be returned if the
+// environment variable is not found or the conversion to
+// type []T fails.
+func toIntSliceType[T IntType, RT int64 | uint64](varName string, separator string, bitSize int, conversionFunc func(string, int, int) (RT, error)) ([]T, error) {
+	value, err := LoadFromEnvironment(varName, true)
+	if err != nil {
+		return []T{}, err
+	}
+
+	valueSlice := strings.Split(value, separator)
+	var convertedValues []T
+	for _, v := range valueSlice {
+		convertedValue, err := conversionFunc(strings.TrimSpace(v), 10, bitSize)
+		if err != nil {
+			return []T{}, err
+		}
+		convertedValues = append(convertedValues, T(convertedValue))
+	}
+
+	return convertedValues, err
+}
+
 // TointTypeWithDefault returns the value of the requested environment
-// variable converted to type T. The default value passed as
-// the second parameter will be returned if the environment
-// variable is not found or the conversion to typeT fails.
+// variable converted to type T. The default value passed as the
+// second parameter will be returned if the environmentvariable
+// is not found or the conversion to type T fails.
 func toIntTypeWithDefault[T IntType, RT int64 | uint64](varName string, defaultValue T, bitSize int, conversionFunc func(string, int, int) (RT, error)) T {
 	value, err := LoadFromEnvironment(varName, true)
 	if err != nil {
@@ -43,6 +69,29 @@ func toIntTypeWithDefault[T IntType, RT int64 | uint64](varName string, defaultV
 	return T(convertedValue)
 }
 
+// toIntSliceType returns the value of the requested environment variable
+// converted to type []T. The default value passed as the second
+// parameter will be returned if the environment variable is
+// not found or the conversion to type []T fails.
+func toIntSliceTypeWithDefault[T IntType, RT int64 | uint64](varName string, separator string, defaultValue []T, bitSize int, conversionFunc func(string, int, int) (RT, error)) []T {
+	value, err := LoadFromEnvironment(varName, true)
+	if err != nil {
+		return defaultValue
+	}
+
+	valueSlice := strings.Split(value, separator)
+	var convertedValues []T
+	for _, v := range valueSlice {
+		convertedValue, err := conversionFunc(strings.TrimSpace(v), 10, bitSize)
+		if err != nil {
+			return defaultValue
+		}
+		convertedValues = append(convertedValues, T(convertedValue))
+	}
+
+	return convertedValues
+}
+
 // ToInt returns the value of the requested environment variable
 // converted to an int. An error will be returned if the
 // environment variable is not found or the conversion to
@@ -51,12 +100,28 @@ func ToInt(varName string) (int, error) {
 	return toIntType[int](varName, 64, strconv.ParseInt)
 }
 
+// ToIntSlice returns the value of the requested environment variable
+// converted to a slice of int. An error will be returned if the
+// environment variable is not found or the conversion to
+// slice of ints fails.
+func ToIntSlice(varName string, separator string) ([]int, error) {
+	return toIntSliceType[int](varName, separator, 64, strconv.ParseInt)
+}
+
 // ToIntWithDefault returns the value of the requested environment
 // variable converted to an int. The default value passed as
 // the second parameter will be returned if the environment
 // variable is not found or the conversion to int fails.
 func ToIntWithDefault(varName string, defaultValue int) int {
 	return toIntTypeWithDefault[int](varName, defaultValue, 64, strconv.ParseInt)
+}
+
+// ToIntSliceWithDefault returns the value of the requested environment
+// variable converted to a slice of ints. The default value passed as
+// the second parameter will be returned if the environment
+// variable is not found or the conversion to a slice of ints fails.
+func ToIntSliceWithDefault(varName string, separator string, defaultValue []int) []int {
+	return toIntSliceTypeWithDefault[int](varName, separator, defaultValue, 64, strconv.ParseInt)
 }
 
 // ToInt8 returns the value of the requested environment variable
