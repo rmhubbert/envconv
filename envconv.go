@@ -31,3 +31,14 @@ func LoadFromEnvironment(varName string, allowEmpty bool) (string, error) {
 	}
 	return val, nil
 }
+
+// LoadFromEvironmentWithDefault returns the value of the requested environment variable.
+// A default value is returned if that variable is not set or the loaded environment
+// variable  is empty.
+func LoadFromEnvironmentWithDefault(varName string, defaultValue string) string {
+	val, err := LoadFromEnvironment(varName, true)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
