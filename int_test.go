@@ -8,23 +8,150 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Tests for int type
-type ToIntTest struct {
-	env         string
-	value       string
-	expected    int
-	errExpected bool
+type TestReturnValueType interface {
+	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64
 }
 
-type ToIntWithDefaultTest struct {
-	env          string
-	value        string
-	expected     int
-	defaultValue int
+// runTest provides a generic test run for the convertor function types that
+// return an error
+func runTest[T TestReturnValueType, F func(string) (T, error)](
+	t *testing.T,
+	env string,
+	value string,
+	expected T,
+	errExpected bool,
+	handler F,
+) {
+	t.Run(env, func(t *testing.T) {
+		os.Setenv(env, value)
+		v, err := handler(env)
+		if errExpected {
+			assert.Error(t, err, "there should be an error")
+		} else {
+			assert.NoError(t, err, "there should be no error")
+		}
+		assert.Equal(t, expected, v, "they should be equal")
+	})
+}
+
+// runEmptyTest provides a generic test run for testing an empty environment
+// variable on convertor function types that retun an error.
+func runEmptyTest[T TestReturnValueType, F func(string) (T, error)](t *testing.T, expected T, handler F) {
+	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
+		v, err := handler("TEST_NON_EXISTANT")
+		assert.Error(t, err, "there should be an error")
+		assert.Equal(t, expected, v, "they should be equal")
+	})
+}
+
+// runWithDefaultTest provides a generic test run for the convertor function
+// types that return a default value.
+func runWithDefaultTest[T TestReturnValueType, F func(string, T) T](
+	t *testing.T,
+	env string,
+	value string,
+	expected T,
+	defaultValue T,
+	handler F,
+) {
+	t.Run(env, func(t *testing.T) {
+		os.Setenv(env, value)
+		v := handler(env, defaultValue)
+		if v != expected {
+			assert.Equal(t, defaultValue, v, "they should be equal")
+		} else {
+			assert.Equal(t, expected, v, "they should be equal")
+		}
+	})
+}
+
+// runWithDefaultEmptyTest provides a generic test run for testing an empty
+// environment variable on convertor function types that retun a default
+// value.
+func runWithDefaultEmptyTest[T TestReturnValueType, F func(string, T) T](t *testing.T, expected T, handler F) {
+	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
+		v := handler("TEST_NON_EXISTANT", expected)
+		assert.Equal(t, expected, v, "they should be equal")
+	})
+}
+
+// runWithDefaultTest provides a generic test run for the convertor function
+// types that return a default value.
+func runSliceTest[T TestReturnValueType, F func(string, string) ([]T, error)](
+	t *testing.T,
+	env string,
+	value string,
+	separator string,
+	expected []T,
+	errExpected bool,
+	handler F,
+) {
+	t.Run(env, func(t *testing.T) {
+		os.Setenv(env, value)
+		v, err := handler(env, separator)
+		if errExpected {
+			assert.Error(t, err, "there should be an error")
+		} else {
+			assert.NoError(t, err, "there should be no error")
+		}
+		assert.Equal(t, expected, v, "they should be equal")
+	})
+}
+
+// runSliceEmptyTest provides a generic test run for testing an empty environment
+// variable on convertor function types that return a an error.
+func runSliceEmptyTest[T TestReturnValueType, F func(string, string) ([]T, error)](t *testing.T, separator string, expected []T, handler F) {
+	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
+		v, err := handler("TEST_NON_EXISTANT", separator)
+		assert.Error(t, err, "there should be an error")
+		assert.Equal(t, expected, v, "they should be equal")
+	})
+}
+
+// runSliceWithDefaultTest provides a generic test run for the convertor function
+// types that return a default value.
+func runSliceWithDefaultTest[T TestReturnValueType, F func(string, string, []T) []T](
+	t *testing.T,
+	env string,
+	value string,
+	separator string,
+	expected []T,
+	defaultValue []T,
+	handler F,
+) {
+	t.Run(env, func(t *testing.T) {
+		os.Setenv(env, value)
+		v := handler(env, separator, defaultValue)
+		if !slicesEqual(v, expected) {
+			assert.Equal(t, defaultValue, v, "they should be equal")
+		} else {
+			assert.Equal(t, expected, v, "they should be equal")
+		}
+	})
+}
+
+// runSliceWithDefaultEmptyTest provides a generic test run for testing an empty
+// environment variable on convertor function types that retun a default
+// value.
+func runSliceWithDefaultEmptyTest[T TestReturnValueType, F func(string, string, []T) []T](
+	t *testing.T,
+	separator string,
+	expected []T,
+	handler F,
+) {
+	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
+		v := handler("TEST_NON_EXISTANT", separator, expected)
+		assert.Equal(t, expected, v, "they should be equal")
+	})
 }
 
 func TestToInt(t *testing.T) {
-	testData := []ToIntTest{
+	testData := []struct {
+		env         string
+		value       string
+		expected    int
+		errExpected bool
+	}{
 		{"TEST_INT_0", "0", 0, false},
 		{"TEST_INT_9223372036854775807", "9223372036854775807", 9223372036854775807, false},
 		{"TEST_INT_9223372036854775808", "9223372036854775808", 0, true},
@@ -34,27 +161,42 @@ func TestToInt(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToInt(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToInt)
+	}
+	runEmptyTest(t, int(0), envconv.ToInt)
+}
+
+func TestToIntSlice(t *testing.T) {
+	testData := []struct {
+		env         string
+		value       string
+		separator   string
+		expected    []int
+		errExpected bool
+	}{
+		{"TEST_INT_SLICE_123_COMMA", "1,2,3", ",", []int{1, 2, 3}, false},
+		{"TEST_INT_SLICE_123_COMMA_SPACE", "1, 2, 3", ",", []int{1, 2, 3}, false},
+		{"TEST_INT_SLICE_123_SPACE", "1 2 3", ",", []int{}, true},
+		{"TEST_INT_SLICE_9223372036854775807", "9223372036854775807,2,3", ",", []int{9223372036854775807, 2, 3}, false},
+		{"TEST_INT_SLICE_9223372036854775808", "9223372036854775808,2,3", ",", []int{}, true},
+		{"TEST_INT_SLICE_-9223372036854775808", "-9223372036854775808,2,3", ",", []int{-9223372036854775808, 2, 3}, false},
+		{"TEST_INT_SLICE_-9223372036854775809", "-9223372036854775809,2,3", ",", []int{}, true},
+		{"TEST_INT_SLICE_NOTANUMBER", "1,2,notanumber,4", ",", []int{}, true},
 	}
 
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToInt("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, 0, v, "they should be equal")
-	})
+	for _, td := range testData {
+		runSliceTest(t, td.env, td.value, td.separator, td.expected, td.errExpected, envconv.ToIntSlice)
+	}
+	runSliceEmptyTest[int](t, ",", []int{}, envconv.ToIntSlice)
 }
 
 func TestToIntWithDefault(t *testing.T) {
-	testData := []ToIntWithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     int
+		defaultValue int
+	}{
 		{"TEST_INT_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_INT_WITH_DEFAULT_9223372036854775807", "9223372036854775807", 9223372036854775807, 105},
 		{"TEST_INT_WITH_DEFAULT_9223372036854775808", "9223372036854775808", 0, 105},
@@ -64,40 +206,42 @@ func TestToIntWithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToIntWithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToIntWithDefault)
+	}
+	runWithDefaultEmptyTest(t, int(0), envconv.ToIntWithDefault)
+}
+
+func TestToIntSliceWithDefault(t *testing.T) {
+	testData := []struct {
+		env          string
+		value        string
+		separator    string
+		expected     []int
+		defaultValue []int
+	}{
+		{"TEST_INT_SLICE_WITH_DEFAULT_123_COMMA", "1,2,3", ", ", []int{1, 2, 3}, []int{1, 0, 5}},
+		{"TEST_INT_SLICE_WITH_DEFAULT_123_COMMA_SPACE", "1, 2, 3", ", ", []int{1, 2, 3}, []int{1, 0, 5}},
+		{"TEST_INT_SLICE_WITH_DEFAULT_123_SPACE", "1 2 3", ", ", []int{}, []int{1, 0, 5}},
+		{"TEST_INT_SLICE_WITH_DEFAULT_9223372036854775807", "9223372036854775807,2,3", ", ", []int{9223372036854775807, 2, 3}, []int{1, 0, 5}},
+		{"TEST_INT_SLICE_WITH_DEFAULT_9223372036854775808", "9223372036854775808,2,3", ", ", []int{}, []int{1, 0, 5}},
+		{"TEST_INT_SLICE_WITH_DEFAULT_-9223372036854775808", "-9223372036854775808,2,3", ", ", []int{-9223372036854775808, 2, 3}, []int{1, 0, 5}},
+		{"TEST_INT_SLICE_WITH_DEFAULT_-9223372036854775809", "-9223372036854775809,2,3", ", ", []int{}, []int{1, 0, 5}},
+		{"TEST_INT_SLICE_WITH_DEFAULT_NOTANUMBER", "1,2,notanumber,4", ", ", []int{}, []int{1, 0, 5}},
 	}
 
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToIntWithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, int(105), v, "they should be equal")
-	})
-}
-
-// Tests for int8 type
-type ToInt8Test struct {
-	env         string
-	value       string
-	expected    int8
-	errExpected bool
-}
-
-type ToInt8WithDefaultTest struct {
-	env          string
-	value        string
-	expected     int8
-	defaultValue int8
+	for _, td := range testData {
+		runSliceWithDefaultTest(t, td.env, td.value, td.separator, td.expected, td.defaultValue, envconv.ToIntSliceWithDefault)
+	}
+	runSliceWithDefaultEmptyTest[int](t, ",", []int{1, 0, 5}, envconv.ToIntSliceWithDefault)
 }
 
 func TestToInt8(t *testing.T) {
-	testData := []ToInt8Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    int8
+		errExpected bool
+	}{
 		{"TEST_INT8_0", "0", 0, false},
 		{"TEST_INT8_127", "127", 127, false},
 		{"TEST_INT8_128", "128", 0, true},
@@ -107,27 +251,18 @@ func TestToInt8(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToInt8(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToInt8)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToInt8("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, int8(0), v, "they should be equal")
-	})
+	runEmptyTest(t, int8(0), envconv.ToInt8)
 }
 
 func TestToInt8WithDefault(t *testing.T) {
-	testData := []ToInt8WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     int8
+		defaultValue int8
+	}{
 		{"TEST_INT8_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_INT8_WITH_DEFAULT_127", "127", 127, 105},
 		{"TEST_INT8_WITH_DEFAULT_128", "128", 0, 105},
@@ -137,40 +272,18 @@ func TestToInt8WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToInt8WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToInt8WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToInt8WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, int8(105), v, "they should be equal")
-	})
-}
-
-// Tests for int16 type
-type ToInt16Test struct {
-	env         string
-	value       string
-	expected    int16
-	errExpected bool
-}
-
-type ToInt16WithDefaultTest struct {
-	env          string
-	value        string
-	expected     int16
-	defaultValue int16
+	runWithDefaultEmptyTest(t, int8(0), envconv.ToInt8WithDefault)
 }
 
 func TestToInt16(t *testing.T) {
-	testData := []ToInt16Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    int16
+		errExpected bool
+	}{
 		{"TEST_INT16_0", "0", 0, false},
 		{"TEST_INT16_32767", "32767", 32767, false},
 		{"TEST_INT16_32768", "32768", 0, true},
@@ -180,27 +293,18 @@ func TestToInt16(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToInt16(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToInt16)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToInt16("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, int16(0), v, "they should be equal")
-	})
+	runEmptyTest(t, int16(0), envconv.ToInt16)
 }
 
 func TestToInt16WithDefault(t *testing.T) {
-	testData := []ToInt16WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     int16
+		defaultValue int16
+	}{
 		{"TEST_INT16_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_INT16_WITH_DEFAULT_32767", "32767", 32767, 105},
 		{"TEST_INT16_WITH_DEFAULT_32768", "32768", 0, 105},
@@ -210,40 +314,18 @@ func TestToInt16WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToInt16WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToInt16WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToInt16WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, int16(105), v, "they should be equal")
-	})
-}
-
-// Tests for int32 type
-type ToInt32Test struct {
-	env         string
-	value       string
-	expected    int32
-	errExpected bool
-}
-
-type ToInt32WithDefaultTest struct {
-	env          string
-	value        string
-	expected     int32
-	defaultValue int32
+	runWithDefaultEmptyTest(t, int16(0), envconv.ToInt16WithDefault)
 }
 
 func TestToInt32(t *testing.T) {
-	testData := []ToInt32Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    int32
+		errExpected bool
+	}{
 		{"TEST_INT32_0", "0", 0, false},
 		{"TEST_INT32_2147483647", "2147483647", 2147483647, false},
 		{"TEST_INT32_2147483648", "2147483648", 0, true},
@@ -253,27 +335,18 @@ func TestToInt32(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToInt32(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToInt32)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToInt32("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, int32(0), v, "they should be equal")
-	})
+	runEmptyTest(t, int32(0), envconv.ToInt32)
 }
 
 func TestToInt32WithDefault(t *testing.T) {
-	testData := []ToInt32WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     int32
+		defaultValue int32
+	}{
 		{"TEST_INT32_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_INT32_WITH_DEFAULT_2147483647", "2147483647", 2147483647, 105},
 		{"TEST_INT32_WITH_DEFAULT_2147483648", "2147483648", 0, 105},
@@ -283,40 +356,18 @@ func TestToInt32WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToInt32WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToInt32WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToInt32WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, int32(105), v, "they should be equal")
-	})
-}
-
-// Tests for int64 type
-type ToInt64Test struct {
-	env         string
-	value       string
-	expected    int64
-	errExpected bool
-}
-
-type ToInt64WithDefaultTest struct {
-	env          string
-	value        string
-	expected     int64
-	defaultValue int64
+	runWithDefaultEmptyTest(t, int32(0), envconv.ToInt32WithDefault)
 }
 
 func TestToInt64(t *testing.T) {
-	testData := []ToInt64Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    int64
+		errExpected bool
+	}{
 		{"TEST_INT64_0", "0", 0, false},
 		{"TEST_INT64_9223372036854775807", "9223372036854775807", 9223372036854775807, false},
 		{"TEST_INT64_9223372036854775808", "9223372036854775808", 0, true},
@@ -326,27 +377,18 @@ func TestToInt64(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToInt64(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToInt64)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToInt64("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, int64(0), v, "they should be equal")
-	})
+	runEmptyTest(t, int64(0), envconv.ToInt64)
 }
 
 func TestToInt64WithDefault(t *testing.T) {
-	testData := []ToInt64WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     int64
+		defaultValue int64
+	}{
 		{"TEST_INT64_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_INT64_WITH_DEFAULT_9223372036854775807", "9223372036854775807", 9223372036854775807, 105},
 		{"TEST_INT64_WITH_DEFAULT_9223372036854775808", "9223372036854775808", 0, 105},
@@ -356,40 +398,18 @@ func TestToInt64WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToInt64WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToInt64WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToInt64WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, int64(105), v, "they should be equal")
-	})
-}
-
-// Tests for uint type
-type ToUIntTest struct {
-	env         string
-	value       string
-	expected    uint
-	errExpected bool
-}
-
-type ToUIntWithDefaultTest struct {
-	env          string
-	value        string
-	expected     uint
-	defaultValue uint
+	runWithDefaultEmptyTest(t, int64(0), envconv.ToInt64WithDefault)
 }
 
 func TestToUInt(t *testing.T) {
-	testData := []ToUIntTest{
+	testData := []struct {
+		env         string
+		value       string
+		expected    uint
+		errExpected bool
+	}{
 		{"TEST_UINT_0", "0", 0, false},
 		{"TEST_UINT_-1", "-1", 0, true},
 		{"TEST_UINT_18446744073709551615", "18446744073709551615", 18446744073709551615, false},
@@ -398,27 +418,18 @@ func TestToUInt(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToUInt(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToUInt)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToUInt("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, uint(0), v, "they should be equal")
-	})
+	runEmptyTest(t, uint(0), envconv.ToUInt)
 }
 
 func TestToUIntWithDefault(t *testing.T) {
-	testData := []ToUIntWithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     uint
+		defaultValue uint
+	}{
 		{"TEST_UINT_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_UINT_WITH_DEFAULT_18446744073709551615", "18446744073709551615", 18446744073709551615, 105},
 		{"TEST_UINT_WITH_DEFAULT_18446744073709551616", "18446744073709551616", 0, 105},
@@ -426,40 +437,18 @@ func TestToUIntWithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToUIntWithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToUIntWithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToUIntWithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, uint(105), v, "they should be equal")
-	})
-}
-
-// Tests for uint8 type
-type ToUInt8Test struct {
-	env         string
-	value       string
-	expected    uint8
-	errExpected bool
-}
-
-type ToUInt8WithDefaultTest struct {
-	env          string
-	value        string
-	expected     uint8
-	defaultValue uint8
+	runWithDefaultEmptyTest(t, uint(0), envconv.ToUIntWithDefault)
 }
 
 func TestToUInt8(t *testing.T) {
-	testData := []ToUInt8Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    uint8
+		errExpected bool
+	}{
 		{"TEST_UINT_0", "0", 0, false},
 		{"TEST_UINT_-1", "-1", 0, true},
 		{"TEST_UINT_255", "255", 255, false},
@@ -468,27 +457,18 @@ func TestToUInt8(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToUInt8(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToUInt8)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToUInt8("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, uint8(0), v, "they should be equal")
-	})
+	runEmptyTest(t, uint8(0), envconv.ToUInt8)
 }
 
 func TestToUInt8WithDefault(t *testing.T) {
-	testData := []ToUInt8WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     uint8
+		defaultValue uint8
+	}{
 		{"TEST_UINT_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_UINT_WITH_DEFAULT_255", "255", 255, 105},
 		{"TEST_UINT_WITH_DEFAULT_256", "256", 0, 105},
@@ -496,40 +476,18 @@ func TestToUInt8WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToUInt8WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToUInt8WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToUInt8WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, uint8(105), v, "they should be equal")
-	})
-}
-
-// Tests for uint16 type
-type ToUInt16Test struct {
-	env         string
-	value       string
-	expected    uint16
-	errExpected bool
-}
-
-type ToUInt16WithDefaultTest struct {
-	env          string
-	value        string
-	expected     uint16
-	defaultValue uint16
+	runWithDefaultEmptyTest(t, uint8(0), envconv.ToUInt8WithDefault)
 }
 
 func TestToUInt16(t *testing.T) {
-	testData := []ToUInt16Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    uint16
+		errExpected bool
+	}{
 		{"TEST_UINT16_0", "0", 0, false},
 		{"TEST_UINT16_-1", "-1", 0, true},
 		{"TEST_UINT16_65535", "65535", 65535, false},
@@ -538,27 +496,18 @@ func TestToUInt16(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToUInt16(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToUInt16)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToUInt16("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, uint16(0), v, "they should be equal")
-	})
+	runEmptyTest(t, uint16(0), envconv.ToUInt16)
 }
 
 func TestToUInt16WithDefault(t *testing.T) {
-	testData := []ToUInt16WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     uint16
+		defaultValue uint16
+	}{
 		{"TEST_UINT16_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_UINT16_WITH_DEFAULT_65535", "65535", 65535, 105},
 		{"TEST_UINT16_WITH_DEFAULT_65536", "65536", 0, 105},
@@ -566,40 +515,18 @@ func TestToUInt16WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToUInt16WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToUInt16WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToUInt16WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, uint16(105), v, "they should be equal")
-	})
-}
-
-// Tests for uint32 type
-type ToUInt32Test struct {
-	env         string
-	value       string
-	expected    uint32
-	errExpected bool
-}
-
-type ToUInt32WithDefaultTest struct {
-	env          string
-	value        string
-	expected     uint32
-	defaultValue uint32
+	runWithDefaultEmptyTest(t, uint16(0), envconv.ToUInt16WithDefault)
 }
 
 func TestToUInt32(t *testing.T) {
-	testData := []ToUInt32Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    uint32
+		errExpected bool
+	}{
 		{"TEST_UINT32_0", "0", 0, false},
 		{"TEST_UINT32_-1", "-1", 0, true},
 		{"TEST_UINT32_4294967295", "4294967295", 4294967295, false},
@@ -608,27 +535,18 @@ func TestToUInt32(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToUInt32(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToUInt32)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToUInt32("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, uint32(0), v, "they should be equal")
-	})
+	runEmptyTest(t, uint32(0), envconv.ToUInt32)
 }
 
 func TestToUInt32WithDefault(t *testing.T) {
-	testData := []ToUInt32WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     uint32
+		defaultValue uint32
+	}{
 		{"TEST_UINT32_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_UINT32_WITH_DEFAULT_4294967295", "4294967295", 4294967295, 105},
 		{"TEST_UINT32_WITH_DEFAULT_4294967296", "4294967296", 0, 105},
@@ -636,40 +554,18 @@ func TestToUInt32WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToUInt32WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToUInt32WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToUInt32WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, uint32(105), v, "they should be equal")
-	})
-}
-
-// Tests for uint64 type
-type ToUInt64Test struct {
-	env         string
-	value       string
-	expected    uint64
-	errExpected bool
-}
-
-type ToUInt64WithDefaultTest struct {
-	env          string
-	value        string
-	expected     uint64
-	defaultValue uint64
+	runWithDefaultEmptyTest(t, uint32(0), envconv.ToUInt32WithDefault)
 }
 
 func TestToUInt64(t *testing.T) {
-	testData := []ToUInt64Test{
+	testData := []struct {
+		env         string
+		value       string
+		expected    uint64
+		errExpected bool
+	}{
 		{"TEST_UINT64_0", "0", 0, false},
 		{"TEST_UINT64_-1", "-1", 0, true},
 		{"TEST_UINT64_4294967295", "18446744073709551615", 18446744073709551615, false},
@@ -678,27 +574,18 @@ func TestToUInt64(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.ToUInt64(td.env)
-			if td.errExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.expected, v, "they should be equal")
-		})
+		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToUInt64)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v, err := envconv.ToUInt64("TEST_NON_EXISTANT")
-		assert.Error(t, err, "there should be an error")
-		assert.Equal(t, uint64(0), v, "they should be equal")
-	})
+	runEmptyTest(t, uint64(0), envconv.ToUInt64)
 }
 
 func TestToUInt64WithDefault(t *testing.T) {
-	testData := []ToUInt64WithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     uint64
+		defaultValue uint64
+	}{
 		{"TEST_UINT64_WITH_DEFAULT_0", "0", 0, 105},
 		{"TEST_UINT64_WITH_DEFAULT_18446744073709551615", "18446744073709551615", 18446744073709551615, 105},
 		{"TEST_UINT64_WITH_DEFAULT_18446744073709551616", "18446744073709551616", 0, 105},
@@ -706,19 +593,7 @@ func TestToUInt64WithDefault(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToUInt64WithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-		})
+		runWithDefaultTest(t, td.env, td.value, td.expected, td.defaultValue, envconv.ToUInt64WithDefault)
 	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToUInt64WithDefault("TEST_NON_EXISTANT", 105)
-		assert.Equal(t, uint64(105), v, "they should be equal")
-	})
+	runWithDefaultEmptyTest(t, uint64(0), envconv.ToUInt64WithDefault)
 }
