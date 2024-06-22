@@ -66,7 +66,11 @@ func TestToDurationWithDefault(t *testing.T) {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToDurationWithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 

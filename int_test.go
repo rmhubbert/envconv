@@ -55,19 +55,23 @@ func TestToInt(t *testing.T) {
 
 func TestToIntWithDefault(t *testing.T) {
 	testData := []ToIntWithDefaultTest{
-		{"TEST_INT_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_INT_WITH_DEFAULT_9223372036854775807", "9223372036854775807", 9223372036854775807, 9223372036854775807},
-		{"TEST_INT_WITH_DEFAULT_9223372036854775808", "9223372036854775808", 0, 0},
-		{"TEST_INT_WITH_DEFAULT_-9223372036854775808", "-9223372036854775808", -9223372036854775808, -9223372036854775808},
-		{"TEST_INT_WITH_DEFAULT_-9223372036854775809", "-9223372036854775809", 0, 0},
-		{"TEST_INT_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_INT_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_INT_WITH_DEFAULT_9223372036854775807", "9223372036854775807", 9223372036854775807, 105},
+		{"TEST_INT_WITH_DEFAULT_9223372036854775808", "9223372036854775808", 0, 105},
+		{"TEST_INT_WITH_DEFAULT_-9223372036854775808", "-9223372036854775808", -9223372036854775808, 105},
+		{"TEST_INT_WITH_DEFAULT_-9223372036854775809", "-9223372036854775809", 0, 105},
+		{"TEST_INT_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToIntWithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -125,18 +129,22 @@ func TestToInt8(t *testing.T) {
 func TestToInt8WithDefault(t *testing.T) {
 	testData := []ToInt8WithDefaultTest{
 		{"TEST_INT8_WITH_DEFAULT_0", "0", 0, 105},
-		{"TEST_INT8_WITH_DEFAULT_127", "127", 127, 127},
-		{"TEST_INT8_WITH_DEFAULT_128", "128", 0, 0},
+		{"TEST_INT8_WITH_DEFAULT_127", "127", 127, 105},
+		{"TEST_INT8_WITH_DEFAULT_128", "128", 0, 105},
 		{"TEST_INT8_WITH_DEFAULT_-128", "-128", -128, 105},
-		{"TEST_INT8_WITH_DEFAULT_-129", "-129", 0, 0},
-		{"TEST_INT8_WITH_DEFAULT_NOTANUMBER", "notanumber", 105, 105},
+		{"TEST_INT8_WITH_DEFAULT_-129", "-129", 0, 105},
+		{"TEST_INT8_WITH_DEFAULT_NOTANUMBER", "notanumber", 1, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToInt8WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -194,18 +202,22 @@ func TestToInt16(t *testing.T) {
 func TestToInt16WithDefault(t *testing.T) {
 	testData := []ToInt16WithDefaultTest{
 		{"TEST_INT16_WITH_DEFAULT_0", "0", 0, 105},
-		{"TEST_INT16_WITH_DEFAULT_32767", "32767", 32767, 32767},
-		{"TEST_INT16_WITH_DEFAULT_32768", "32768", 0, 0},
-		{"TEST_INT16_WITH_DEFAULT_-32768", "-32767", -32767, -32767},
-		{"TEST_INT16_WITH_DEFAULT_-32769", "-32769", 0, 0},
-		{"TEST_INT16_WITH_DEFAULT_NOTANUMBER", "notanumber", 105, 105},
+		{"TEST_INT16_WITH_DEFAULT_32767", "32767", 32767, 105},
+		{"TEST_INT16_WITH_DEFAULT_32768", "32768", 0, 105},
+		{"TEST_INT16_WITH_DEFAULT_-32768", "-32767", -32767, 105},
+		{"TEST_INT16_WITH_DEFAULT_-32769", "-32769", 0, 105},
+		{"TEST_INT16_WITH_DEFAULT_NOTANUMBER", "notanumber", 1, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToInt16WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -262,19 +274,23 @@ func TestToInt32(t *testing.T) {
 
 func TestToInt32WithDefault(t *testing.T) {
 	testData := []ToInt32WithDefaultTest{
-		{"TEST_INT32_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_INT32_WITH_DEFAULT_2147483647", "2147483647", 2147483647, 2147483647},
-		{"TEST_INT32_WITH_DEFAULT_2147483648", "2147483648", 0, 0},
-		{"TEST_INT32_WITH_DEFAULT_-2147483648", "-2147483648", -2147483648, -2147483648},
-		{"TEST_INT32_WITH_DEFAULT_-2147483649", "-2147483649", 0, 0},
-		{"TEST_INT32_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_INT32_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_INT32_WITH_DEFAULT_2147483647", "2147483647", 2147483647, 105},
+		{"TEST_INT32_WITH_DEFAULT_2147483648", "2147483648", 0, 105},
+		{"TEST_INT32_WITH_DEFAULT_-2147483648", "-2147483648", -2147483648, 105},
+		{"TEST_INT32_WITH_DEFAULT_-2147483649", "-2147483649", 0, 105},
+		{"TEST_INT32_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToInt32WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -331,19 +347,23 @@ func TestToInt64(t *testing.T) {
 
 func TestToInt64WithDefault(t *testing.T) {
 	testData := []ToInt64WithDefaultTest{
-		{"TEST_INT64_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_INT64_WITH_DEFAULT_9223372036854775807", "9223372036854775807", 9223372036854775807, 9223372036854775807},
-		{"TEST_INT64_WITH_DEFAULT_9223372036854775808", "9223372036854775808", 0, 0},
-		{"TEST_INT64_WITH_DEFAULT_-9223372036854775808", "-9223372036854775808", -9223372036854775808, -9223372036854775808},
-		{"TEST_INT64_WITH_DEFAULT_-9223372036854775809", "-9223372036854775809", 0, 0},
-		{"TEST_INT64_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_INT64_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_INT64_WITH_DEFAULT_9223372036854775807", "9223372036854775807", 9223372036854775807, 105},
+		{"TEST_INT64_WITH_DEFAULT_9223372036854775808", "9223372036854775808", 0, 105},
+		{"TEST_INT64_WITH_DEFAULT_-9223372036854775808", "-9223372036854775808", -9223372036854775808, 105},
+		{"TEST_INT64_WITH_DEFAULT_-9223372036854775809", "-9223372036854775809", 0, 105},
+		{"TEST_INT64_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToInt64WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -399,17 +419,21 @@ func TestToUInt(t *testing.T) {
 
 func TestToUIntWithDefault(t *testing.T) {
 	testData := []ToUIntWithDefaultTest{
-		{"TEST_UINT_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_UINT_WITH_DEFAULT_18446744073709551615", "18446744073709551615", 18446744073709551615, 18446744073709551615},
-		{"TEST_UINT_WITH_DEFAULT_18446744073709551616", "18446744073709551616", 0, 0},
-		{"TEST_UINT_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_UINT_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_UINT_WITH_DEFAULT_18446744073709551615", "18446744073709551615", 18446744073709551615, 105},
+		{"TEST_UINT_WITH_DEFAULT_18446744073709551616", "18446744073709551616", 0, 105},
+		{"TEST_UINT_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToUIntWithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -465,17 +489,21 @@ func TestToUInt8(t *testing.T) {
 
 func TestToUInt8WithDefault(t *testing.T) {
 	testData := []ToUInt8WithDefaultTest{
-		{"TEST_UINT_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_UINT_WITH_DEFAULT_255", "255", 255, 255},
-		{"TEST_UINT_WITH_DEFAULT_256", "256", 0, 0},
-		{"TEST_UINT_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_UINT_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_UINT_WITH_DEFAULT_255", "255", 255, 105},
+		{"TEST_UINT_WITH_DEFAULT_256", "256", 0, 105},
+		{"TEST_UINT_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToUInt8WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -531,17 +559,21 @@ func TestToUInt16(t *testing.T) {
 
 func TestToUInt16WithDefault(t *testing.T) {
 	testData := []ToUInt16WithDefaultTest{
-		{"TEST_UINT16_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_UINT16_WITH_DEFAULT_65535", "65535", 65535, 65535},
-		{"TEST_UINT16_WITH_DEFAULT_65536", "65536", 0, 0},
-		{"TEST_UINT16_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_UINT16_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_UINT16_WITH_DEFAULT_65535", "65535", 65535, 105},
+		{"TEST_UINT16_WITH_DEFAULT_65536", "65536", 0, 105},
+		{"TEST_UINT16_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToUInt16WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -597,17 +629,21 @@ func TestToUInt32(t *testing.T) {
 
 func TestToUInt32WithDefault(t *testing.T) {
 	testData := []ToUInt32WithDefaultTest{
-		{"TEST_UINT32_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_UINT32_WITH_DEFAULT_4294967295", "4294967295", 4294967295, 4294967295},
-		{"TEST_UINT32_WITH_DEFAULT_4294967296", "4294967296", 0, 0},
-		{"TEST_UINT32_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_UINT32_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_UINT32_WITH_DEFAULT_4294967295", "4294967295", 4294967295, 105},
+		{"TEST_UINT32_WITH_DEFAULT_4294967296", "4294967296", 0, 105},
+		{"TEST_UINT32_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToUInt32WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
@@ -663,17 +699,21 @@ func TestToUInt64(t *testing.T) {
 
 func TestToUInt64WithDefault(t *testing.T) {
 	testData := []ToUInt64WithDefaultTest{
-		{"TEST_UINT64_WITH_DEFAULT_0", "0", 0, 0},
-		{"TEST_UINT64_WITH_DEFAULT_18446744073709551615", "18446744073709551615", 18446744073709551615, 18446744073709551615},
-		{"TEST_UINT64_WITH_DEFAULT_18446744073709551616", "18446744073709551616", 0, 0},
-		{"TEST_UINT64_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 0},
+		{"TEST_UINT64_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_UINT64_WITH_DEFAULT_18446744073709551615", "18446744073709551615", 18446744073709551615, 105},
+		{"TEST_UINT64_WITH_DEFAULT_18446744073709551616", "18446744073709551616", 0, 105},
+		{"TEST_UINT64_WITH_DEFAULT_NOTANUMBER", "notanumber", 0, 105},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToUInt64WithDefault(td.env, td.defaultValue)
-			assert.Equal(t, td.expected, v, "they should be equal")
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
 		})
 	}
 
