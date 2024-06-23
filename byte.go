@@ -38,18 +38,11 @@ func ToByteSlice(varName string) ([]byte, error) {
 // the second parameter will be returned if the environment
 // variable is not found or the conversion to byte fails.
 func ToByteWithDefault(varName string, defaultValue byte) byte {
-	value, err := LoadFromEnvironment(varName, false)
+	value, err := ToByte(varName)
 	if err != nil {
 		return defaultValue
 	}
-
-	var convertedValue int64
-	convertedValue, err = strconv.ParseInt(value, 10, 8)
-	if err != nil {
-		return defaultValue
-	}
-
-	return byte(convertedValue)
+	return value
 }
 
 // ToByteSliceWithDefault returns the value of the requested environment
@@ -57,10 +50,9 @@ func ToByteWithDefault(varName string, defaultValue byte) byte {
 // the second parameter will be returned if the environment
 // variable is not found.
 func ToByteSliceWithDefault(varName string, defaultValue []byte) []byte {
-	value, err := LoadFromEnvironment(varName, false)
+	value, err := ToByteSlice(varName)
 	if err != nil {
 		return defaultValue
 	}
-
-	return []byte(value)
+	return value
 }

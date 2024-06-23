@@ -33,15 +33,9 @@ func ToBool(varName string) (bool, error) {
 // the second parameter will be returned if the environment
 // variable is not found or the conversion to boolean fails.
 func ToBoolWithDefault(varName string, defaultValue bool) bool {
-	value, err := LoadFromEnvironment(varName, false)
+	value, err := ToBool(varName)
 	if err != nil {
 		return defaultValue
 	}
-
-	var convertedValue bool
-	convertedValue, err = convertBool(value)
-	if err != nil {
-		return defaultValue
-	}
-	return convertedValue
+	return value
 }

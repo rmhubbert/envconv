@@ -56,17 +56,11 @@ func toIntSliceType[T intType, RT int64 | uint64](varName string, separator stri
 // second parameter will be returned if the environmentvariable
 // is not found or the conversion to type T fails.
 func toIntTypeWithDefault[T intType, RT int64 | uint64](varName string, defaultValue T, bitSize int, conversionFunc func(string, int, int) (RT, error)) T {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := toIntType[T](varName, bitSize, conversionFunc)
 	if err != nil {
 		return defaultValue
 	}
-
-	convertedValue, err := conversionFunc(value, 10, bitSize)
-	if err != nil {
-		return defaultValue
-	}
-
-	return T(convertedValue)
+	return value
 }
 
 // toIntSliceType returns the value of the requested environment variable
@@ -74,22 +68,11 @@ func toIntTypeWithDefault[T intType, RT int64 | uint64](varName string, defaultV
 // parameter will be returned if the environment variable is
 // not found or the conversion to type []T fails.
 func toIntSliceTypeWithDefault[T intType, RT int64 | uint64](varName string, separator string, defaultValue []T, bitSize int, conversionFunc func(string, int, int) (RT, error)) []T {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := toIntSliceType[T](varName, separator, bitSize, conversionFunc)
 	if err != nil {
 		return defaultValue
 	}
-
-	valueSlice := strings.Split(value, separator)
-	var convertedValues []T
-	for _, v := range valueSlice {
-		convertedValue, err := conversionFunc(strings.TrimSpace(v), 10, bitSize)
-		if err != nil {
-			return defaultValue
-		}
-		convertedValues = append(convertedValues, T(convertedValue))
-	}
-
-	return convertedValues
+	return value
 }
 
 // ToInt returns the value of the requested environment variable
