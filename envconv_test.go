@@ -53,7 +53,7 @@ func slicesEqual[T sliceType](a, b []T) bool {
 	return true
 }
 
-// TestReturnValueType is a type alia interface that is used by the run* generic
+// TestReturnValueType is a type constraint interface that is used by the run* generic
 // test functions
 type TestReturnValueType interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
