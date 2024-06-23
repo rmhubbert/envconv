@@ -7,9 +7,15 @@
 // variable is missing or the conversion fails. The second
 // kind, which will be named with a "WithDefault" suffix,
 // will accept and return a default value instead of
-// returning an error. This second kind is ideal
-// for use when initialising configuration
-// structs.
+// returning an error. This second kind is
+// particularly useful for initialising
+// configuration structs.
+//
+// The package currently has support for converting to int, int8,
+// int16, int32, int63, uint, uint8, uint16, uint32, uint64,
+// bool, byte, string and time.Duration.
+//
+// You can also convert to a slice of any of the available types.
 package envconv
 
 import (
