@@ -8,38 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type ToStringTest struct {
-	env         string
-	value       string
-	expected    string
-	errExpected bool
-}
-
-type ToStringWithDefaultTest struct {
-	env          string
-	value        string
-	expected     string
-	defaultValue string
-}
-
-type ToStringSliceTest struct {
-	env         string
-	value       string
-	separator   string
-	expected    []string
-	errExpected bool
-}
-
-type ToStringSliceWithDefaultTest struct {
-	env          string
-	value        string
-	separator    string
-	expected     []string
-	defaultValue []string
-}
-
 func TestToString(t *testing.T) {
-	testData := []ToStringTest{
+	testData := []struct {
+		env         string
+		value       string
+		expected    string
+		errExpected bool
+	}{
 		{"TEST_STRING_HELLO_WORLD", "Hello World", "Hello World", false},
 	}
 
@@ -63,33 +38,14 @@ func TestToString(t *testing.T) {
 	})
 }
 
-func TestToStringWithDefault(t *testing.T) {
-	testData := []ToStringWithDefaultTest{
-		{"TEST_STRING_HELLO_WORLD", "Hello World", "Hello World", "Default"},
-		{"TEST_STRING_EMPTY", "", "", "Default"},
-	}
-
-	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v := envconv.ToStringWithDefault(td.env, td.defaultValue)
-			if v != td.expected {
-				assert.Equal(t, td.defaultValue, v, "they should be equal")
-			} else {
-				assert.Equal(t, td.expected, v, "they should be equal")
-			}
-
-		})
-	}
-
-	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
-		v := envconv.ToStringWithDefault("TEST_NON_EXISTANT", "")
-		assert.Equal(t, "", v, "they should be equal")
-	})
-}
-
 func TestToStringSlice(t *testing.T) {
-	testData := []ToStringSliceTest{
+	testData := []struct {
+		env         string
+		value       string
+		separator   string
+		expected    []string
+		errExpected bool
+	}{
 		{"TEST_STRING_SLICE_HELLO_WORLD_SPACE", "Hello World", " ", []string{"Hello", "World"}, false},
 		{"TEST_STRING_SLICE_HELLO_WORLD_COMMA", "Hello World", ",", []string{"Hello World"}, false},
 	}
@@ -114,8 +70,44 @@ func TestToStringSlice(t *testing.T) {
 	})
 }
 
+func TestToStringWithDefault(t *testing.T) {
+	testData := []struct {
+		env          string
+		value        string
+		expected     string
+		defaultValue string
+	}{
+		{"TEST_STRING_HELLO_WORLD", "Hello World", "Hello World", "Default"},
+		{"TEST_STRING_EMPTY", "", "", "Default"},
+	}
+
+	for _, td := range testData {
+		t.Run(td.env, func(t *testing.T) {
+			os.Setenv(td.env, td.value)
+			v := envconv.ToStringWithDefault(td.env, td.defaultValue)
+			if v != td.expected {
+				assert.Equal(t, td.defaultValue, v, "they should be equal")
+			} else {
+				assert.Equal(t, td.expected, v, "they should be equal")
+			}
+
+		})
+	}
+
+	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
+		v := envconv.ToStringWithDefault("TEST_NON_EXISTANT", "")
+		assert.Equal(t, "", v, "they should be equal")
+	})
+}
+
 func TestToStringSliceWithDefault(t *testing.T) {
-	testData := []ToStringSliceWithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		separator    string
+		expected     []string
+		defaultValue []string
+	}{
 		{"TEST_STRING_SLICE_WITH_DEFAUTL_HELLO_WORLD", "Hello World", " ", []string{"Hello", "World"}, []string{"105"}},
 		{"TEST_STRING_SLICE_WITH_DEFAULT_EMPTY", "", " ", []string{""}, []string{"105"}},
 	}
