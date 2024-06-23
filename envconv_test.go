@@ -56,11 +56,11 @@ func slicesEqual[T sliceType](a, b []T) bool {
 // TestReturnValueType is a type alia interface that is used by the run* generic
 // test functions
 type TestReturnValueType interface {
-	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
 }
 
 // runTest provides a generic test run for the convertor function types that
-// return an error
+// take a single string and return a T and an error
 func runTest[T TestReturnValueType, F func(string) (T, error)](
 	t *testing.T,
 	env string,
