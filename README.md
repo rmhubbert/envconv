@@ -7,7 +7,7 @@ The package currently has support for converting to int, int8, int16, int32, int
 
 You can also convert to a slice of any of the available types.
 
-```
+```go
 package main
 
 import (
