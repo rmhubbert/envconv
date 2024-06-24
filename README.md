@@ -1,3 +1,4 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/rmhubbert/envconv.svg)](https://pkg.go.dev/github.com/rmhubbert/envconv)
 # envconv
 envconv implements utility functions for retrieving and converting an environment variable to the specified type in a single step.
 
