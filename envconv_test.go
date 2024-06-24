@@ -9,9 +9,9 @@ import (
 )
 
 type EnvTest struct {
-	env         string
-	value       string
-	errExpected bool
+	env           string
+	value         string
+	errorExpected bool
 }
 
 func TestLoadFromEnvironment(t *testing.T) {
@@ -25,7 +25,7 @@ func TestLoadFromEnvironment(t *testing.T) {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v, err := envconv.LoadFromEnvironment(td.env, true)
-			if td.errExpected {
+			if td.errorExpected {
 				assert.Error(t, err, "there should be an error")
 			} else {
 				assert.NoError(t, err, "there should be no error")
@@ -35,28 +35,10 @@ func TestLoadFromEnvironment(t *testing.T) {
 	}
 }
 
-type sliceType interface {
-	~string | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
-}
-
-func slicesEqual[T sliceType](a, b []T) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
 // TestReturnValueType is a type constraint interface that is used by the run* generic
 // test functions
 type TestReturnValueType interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64
 }
 
 // runTest provides a generic test run for the convertor function types that
@@ -66,13 +48,13 @@ func runTest[T TestReturnValueType, F func(string) (T, error)](
 	env string,
 	value string,
 	expected T,
-	errExpected bool,
+	errorExpected bool,
 	handler F,
 ) {
 	t.Run(env, func(t *testing.T) {
 		os.Setenv(env, value)
 		v, err := handler(env)
-		if errExpected {
+		if errorExpected {
 			assert.Error(t, err, "there should be an error")
 		} else {
 			assert.NoError(t, err, "there should be no error")
@@ -130,13 +112,13 @@ func runSliceTest[T TestReturnValueType, F func(string, string) ([]T, error)](
 	value string,
 	separator string,
 	expected []T,
-	errExpected bool,
+	errorExpected bool,
 	handler F,
 ) {
 	t.Run(env, func(t *testing.T) {
 		os.Setenv(env, value)
 		v, err := handler(env, separator)
-		if errExpected {
+		if errorExpected {
 			assert.Error(t, err, "there should be an error")
 		} else {
 			assert.NoError(t, err, "there should be no error")
@@ -164,12 +146,13 @@ func runSliceWithDefaultTest[T TestReturnValueType, F func(string, string, []T) 
 	separator string,
 	expected []T,
 	defaultValue []T,
+	defaultExpected bool,
 	handler F,
 ) {
 	t.Run(env, func(t *testing.T) {
 		os.Setenv(env, value)
 		v := handler(env, separator, defaultValue)
-		if !slicesEqual(v, expected) {
+		if defaultExpected {
 			assert.Equal(t, defaultValue, v, "they should be equal")
 		} else {
 			assert.Equal(t, expected, v, "they should be equal")

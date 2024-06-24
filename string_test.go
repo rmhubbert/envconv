@@ -10,10 +10,10 @@ import (
 
 func TestToString(t *testing.T) {
 	testData := []struct {
-		env         string
-		value       string
-		expected    string
-		errExpected bool
+		env           string
+		value         string
+		expected      string
+		errorExpected bool
 	}{
 		{"TEST_STRING_HELLO_WORLD", "Hello World", "Hello World", false},
 	}
@@ -22,7 +22,7 @@ func TestToString(t *testing.T) {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v, err := envconv.ToString(td.env)
-			if td.errExpected {
+			if td.errorExpected {
 				assert.Error(t, err, "there should be an error")
 			} else {
 				assert.NoError(t, err, "there should be no error")
@@ -40,11 +40,11 @@ func TestToString(t *testing.T) {
 
 func TestToStringSlice(t *testing.T) {
 	testData := []struct {
-		env         string
-		value       string
-		separator   string
-		expected    []string
-		errExpected bool
+		env           string
+		value         string
+		separator     string
+		expected      []string
+		errorExpected bool
 	}{
 		{"TEST_STRING_SLICE_HELLO_WORLD_SPACE", "Hello World", " ", []string{"Hello", "World"}, false},
 		{"TEST_STRING_SLICE_HELLO_WORLD_COMMA", "Hello World", ",", []string{"Hello World"}, false},
@@ -54,7 +54,7 @@ func TestToStringSlice(t *testing.T) {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v, err := envconv.ToStringSlice(td.env, td.separator)
-			if td.errExpected {
+			if td.errorExpected {
 				assert.Error(t, err, "there should be an error")
 			} else {
 				assert.NoError(t, err, "there should be no error")
@@ -101,22 +101,24 @@ func TestToStringWithDefault(t *testing.T) {
 }
 
 func TestToStringSliceWithDefault(t *testing.T) {
+	defaultValue := []string{"105"}
 	testData := []struct {
-		env          string
-		value        string
-		separator    string
-		expected     []string
-		defaultValue []string
+		env             string
+		value           string
+		separator       string
+		expected        []string
+		defaultValue    []string
+		defaultExpected bool
 	}{
-		{"TEST_STRING_SLICE_WITH_DEFAUTL_HELLO_WORLD", "Hello World", " ", []string{"Hello", "World"}, []string{"105"}},
-		{"TEST_STRING_SLICE_WITH_DEFAULT_EMPTY", "", " ", []string{""}, []string{"105"}},
+		{"TEST_STRING_SLICE_WITH_DEFAULT_HELLO_WORLD", "Hello World", " ", []string{"Hello", "World"}, defaultValue, false},
+		{"TEST_STRING_SLICE_WITH_DEFAULT_EMPTY", "", " ", []string{""}, defaultValue, false},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToStringSliceWithDefault(td.env, td.separator, td.defaultValue)
-			if !slicesEqual(v, td.expected) {
+			if td.defaultExpected {
 				assert.Equal(t, td.defaultValue, v, "they should be equal")
 			} else {
 				assert.Equal(t, td.expected, v, "they should be equal")

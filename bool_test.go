@@ -9,10 +9,10 @@ import (
 )
 
 type ToBoolTest struct {
-	env         string
-	value       string
-	expected    bool
-	errExpected bool
+	env           string
+	value         string
+	expected      bool
+	errorExpected bool
 }
 
 type ToBoolWithDefaultTest struct {
@@ -39,7 +39,7 @@ func TestToBool(t *testing.T) {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v, err := envconv.ToBool(td.env)
-			if td.errExpected {
+			if td.errorExpected {
 				assert.Error(t, err, "there should be an error")
 			} else {
 				assert.NoError(t, err, "there should be no error")

@@ -9,10 +9,10 @@ import (
 
 func TestToDuration(t *testing.T) {
 	testData := []struct {
-		env         string
-		value       string
-		expected    time.Duration
-		errExpected bool
+		env           string
+		value         string
+		expected      time.Duration
+		errorExpected bool
 	}{
 		{"TEST_DURATION_1s", "1s", 1000000000, false},
 		{"TEST_DURATION_1m", "1m", 60000000000, false},
@@ -22,18 +22,18 @@ func TestToDuration(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		runTest(t, td.env, td.value, td.expected, td.errExpected, envconv.ToDuration)
+		runTest(t, td.env, td.value, td.expected, td.errorExpected, envconv.ToDuration)
 	}
 	runEmptyTest(t, time.Duration(0), envconv.ToDuration)
 }
 
 func TestToDurationSlice(t *testing.T) {
 	testData := []struct {
-		env         string
-		value       string
-		separator   string
-		expected    []time.Duration
-		errExpected bool
+		env           string
+		value         string
+		separator     string
+		expected      []time.Duration
+		errorExpected bool
 	}{
 		{"TEST_DURATION_SLICE_1s_1m_1h_SPACE", "1s 1m 1h", " ", []time.Duration{1000000000, 60000000000, 3600000000000}, false},
 		{"TEST_DURATION_SLICE_1s_1m_1h_COMMA", "1s,1m,1h", ",", []time.Duration{1000000000, 60000000000, 3600000000000}, false},
@@ -44,7 +44,7 @@ func TestToDurationSlice(t *testing.T) {
 	}
 
 	for _, td := range testData {
-		runSliceTest(t, td.env, td.value, td.separator, td.expected, td.errExpected, envconv.ToDurationSlice)
+		runSliceTest(t, td.env, td.value, td.separator, td.expected, td.errorExpected, envconv.ToDurationSlice)
 	}
 	runSliceEmptyTest[time.Duration](t, ",", []time.Duration{}, envconv.ToDurationSlice)
 }
@@ -75,22 +75,23 @@ func TestToDurationSliceWithDefault(t *testing.T) {
 	def := []time.Duration{hour}
 
 	testData := []struct {
-		env          string
-		value        string
-		separator    string
-		expected     []time.Duration
-		defaultValue []time.Duration
+		env             string
+		value           string
+		separator       string
+		expected        []time.Duration
+		defaultValue    []time.Duration
+		defaultExpected bool
 	}{
-		{"TEST_DURATION_SLICE_1s_1m_1h_SPACE", "1s 1m 1h", " ", []time.Duration{1000000000, 60000000000, 3600000000000}, def},
-		{"TEST_DURATION_SLICE_1s_1m_1h_COMMA", "1s,1m,1h", ",", []time.Duration{1000000000, 60000000000, 3600000000000}, def},
-		{"TEST_DURATION_SLICE_1s_1m_1h_COMMA_SPACE", "1s, 1m, 1h", ", ", []time.Duration{1000000000, 60000000000, 3600000000000}, def},
-		{"TEST_DURATION_SLICE_1s", "1s", ", ", []time.Duration{1000000000}, def},
-		{"TEST_DURATION_SLICE_105", "105", ", ", []time.Duration{}, def},
-		{"TEST_DURATION_SLICE_NOTADURATION", "notaduration", ",", []time.Duration{}, def},
+		{"TEST_DURATION_SLICE_1s_1m_1h_SPACE", "1s 1m 1h", " ", []time.Duration{1000000000, 60000000000, 3600000000000}, def, false},
+		{"TEST_DURATION_SLICE_1s_1m_1h_COMMA", "1s,1m,1h", ",", []time.Duration{1000000000, 60000000000, 3600000000000}, def, false},
+		{"TEST_DURATION_SLICE_1s_1m_1h_COMMA_SPACE", "1s, 1m, 1h", ", ", []time.Duration{1000000000, 60000000000, 3600000000000}, def, false},
+		{"TEST_DURATION_SLICE_1s", "1s", ", ", []time.Duration{1000000000}, def, false},
+		{"TEST_DURATION_SLICE_105", "105", ", ", []time.Duration{}, def, true},
+		{"TEST_DURATION_SLICE_NOTADURATION", "notaduration", ",", []time.Duration{}, def, true},
 	}
 
 	for _, td := range testData {
-		runSliceWithDefaultTest(t, td.env, td.value, td.separator, td.expected, td.defaultValue, envconv.ToDurationSliceWithDefault)
+		runSliceWithDefaultTest(t, td.env, td.value, td.separator, td.expected, td.defaultValue, td.defaultExpected, envconv.ToDurationSliceWithDefault)
 	}
 	runSliceWithDefaultEmptyTest[time.Duration](t, ",", def, envconv.ToDurationSliceWithDefault)
 }

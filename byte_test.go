@@ -10,10 +10,10 @@ import (
 
 func TestToByte(t *testing.T) {
 	testData := []struct {
-		env         string
-		value       string
-		expected    byte
-		errExpected bool
+		env           string
+		value         string
+		expected      byte
+		errorExpected bool
 	}{
 		{"TEST_BYTE_1", "-128", 128, false},
 		{"TEST_BYTE_1", "-129", 0, true},
@@ -28,7 +28,7 @@ func TestToByte(t *testing.T) {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v, err := envconv.ToByte(td.env)
-			if td.errExpected {
+			if td.errorExpected {
 				assert.Error(t, err, "there should be an error")
 			} else {
 				assert.NoError(t, err, "there should be no error")
@@ -46,10 +46,10 @@ func TestToByte(t *testing.T) {
 
 func TestToByteSlice(t *testing.T) {
 	testData := []struct {
-		env         string
-		value       string
-		expected    []byte
-		errExpected bool
+		env           string
+		value         string
+		expected      []byte
+		errorExpected bool
 	}{
 		{"TEST_BYTE_SLICE_HELLO_WORLD", "Hello World", []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}, false},
 	}
@@ -58,7 +58,7 @@ func TestToByteSlice(t *testing.T) {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v, err := envconv.ToByteSlice(td.env)
-			if td.errExpected {
+			if td.errorExpected {
 				assert.Error(t, err, "there should be an error")
 			} else {
 				assert.NoError(t, err, "there should be no error")
@@ -109,20 +109,22 @@ func TestToByteWithDefault(t *testing.T) {
 }
 
 func TestToByteSliceWithDefault(t *testing.T) {
+	defaultValue := []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}
 	testData := []struct {
-		env          string
-		value        string
-		expected     []byte
-		defaultValue []byte
+		env             string
+		value           string
+		expected        []byte
+		defaultValue    []byte
+		defaultExpected bool
 	}{
-		{"TEST_BYTE_SLICE_WITH_DEFAULT_HELLO_WORLD", "Hello World", []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}, []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}},
+		{"TEST_BYTE_SLICE_WITH_DEFAULT_HELLO_WORLD", "Hello World", []byte{72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100}, defaultValue, false},
 	}
 
 	for _, td := range testData {
 		t.Run(td.env, func(t *testing.T) {
 			os.Setenv(td.env, td.value)
 			v := envconv.ToByteSliceWithDefault(td.env, td.defaultValue)
-			if !slicesEqual(v, td.expected) {
+			if td.defaultExpected {
 				assert.Equal(t, td.defaultValue, v, "they should be equal")
 			} else {
 				assert.Equal(t, td.expected, v, "they should be equal")
