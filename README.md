@@ -62,16 +62,15 @@ func main() {
 	// variable converted to a slice of ints. The default value passed as
 	// the second parameter will be returned if the environment
 	// variable is not found or the conversion to a slice of ints fails.
-	defaultIntSlice := envconv.ToIntSliceWithDefault("INVALID_INT_SLICE", ",", []int{1, 2, 3})
+	defaultIntSlice := envconv.ToIntSliceWithDefault(
+        "INVALID_INT_SLICE", 
+        ",", 
+        []int{1, 2, 3},
+    )
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("INVALID_INT_SLICE = %v\n", defaultIntSlice)
 
-	// Output:
-	// VALID_INT = 105
-	// INVALID_INT = 123
-	// VALID_INT_SLICE = [12 5 74]
-	// INVALID_INT_SLICE = [1 2 3]
 }
 ```
