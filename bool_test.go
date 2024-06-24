@@ -8,22 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type ToBoolTest struct {
-	env           string
-	value         string
-	expected      bool
-	errorExpected bool
-}
-
-type ToBoolWithDefaultTest struct {
-	env          string
-	value        string
-	expected     bool
-	defaultValue bool
-}
-
 func TestToBool(t *testing.T) {
-	testData := []ToBoolTest{
+	testData := []struct {
+		env           string
+		value         string
+		expected      bool
+		errorExpected bool
+	}{
 		{"TEST_BOOL_1", "1", true, false},
 		{"TEST_BOOL_true", "true", true, false},
 		{"TEST_BOOL_TRUE", "TRUE", true, false},
@@ -55,8 +46,33 @@ func TestToBool(t *testing.T) {
 	})
 }
 
+func TestToBoolSlice(t *testing.T) {
+	testData := []struct {
+		env           string
+		value         string
+		separator     string
+		expected      []bool
+		errorExpected bool
+	}{
+		{"TEST_BOOL_SLICE_TRUE_FALSE_TRUE_SPACE", "true false true", " ", []bool{true, false, true}, false},
+		{"TEST_BOOL_SLICE_1_0_T_COMMA", "1,0,t", ",", []bool{true, false, true}, false},
+		{"TEST_BOOL_SLICE_105", "1,0,2", ",", []bool{}, true},
+		{"TEST_BOOL_SLICE_NOTABOOL", "TRUE,notabool,false", ",", []bool{}, true},
+	}
+
+	for _, td := range testData {
+		runSliceTest(t, td.env, td.value, td.separator, td.expected, td.errorExpected, envconv.ToBoolSlice)
+	}
+	runSliceEmptyTest[bool](t, ",", []bool{}, envconv.ToBoolSlice)
+}
+
 func TestToBoolWithDefault(t *testing.T) {
-	testData := []ToBoolWithDefaultTest{
+	testData := []struct {
+		env          string
+		value        string
+		expected     bool
+		defaultValue bool
+	}{
 		{"TEST_BOOL_WITH_DEFAULT_1", "1", true, false},
 		{"TEST_BOOL_WITH_DEFAULT_true", "true", true, false},
 		{"TEST_BOOL_WITH_DEFAULT_TRUE", "TRUE", true, false},
@@ -84,4 +100,26 @@ func TestToBoolWithDefault(t *testing.T) {
 		v := envconv.ToBoolWithDefault("TEST_NON_EXISTANT", false)
 		assert.Equal(t, false, v, "they should be equal")
 	})
+}
+
+func TestToBoolSliceWithDefault(t *testing.T) {
+	def := []bool{true, false, true}
+	testData := []struct {
+		env             string
+		value           string
+		separator       string
+		expected        []bool
+		defaultValue    []bool
+		defaultExpected bool
+	}{
+		{"TEST_DURATION_SLICE_TRUE_FALSE_TRUE_SPACE", "true false true", " ", []bool{true, false, true}, def, false},
+		{"TEST_DURATION_SLICE_1_0_T_COMMA", "1,0,T", ",", []bool{true, false, true}, def, false},
+		{"TEST_DURATION_SLICE_105", "105", ",", []bool{}, def, true},
+		{"TEST_DURATION_SLICE_NOTABOOL", "true,notaduration,0", ",", []bool{}, def, true},
+	}
+
+	for _, td := range testData {
+		runSliceWithDefaultTest(t, td.env, td.value, td.separator, td.expected, td.defaultValue, td.defaultExpected, envconv.ToBoolSliceWithDefault)
+	}
+	runSliceWithDefaultEmptyTest[bool](t, ",", def, envconv.ToBoolSliceWithDefault)
 }
