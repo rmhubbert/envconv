@@ -20,7 +20,7 @@ func convertBool(value string) (bool, error) {
 // environment variable is not found or the conversion to
 // boolean fails.
 func ToBool(varName string) (bool, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return false, err
 	}

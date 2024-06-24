@@ -15,7 +15,7 @@ type intType interface {
 // environment variable is not found or the conversion to
 // type T fails.
 func toIntType[T intType, RT int64 | uint64](varName string, bitSize int, conversionFunc func(string, int, int) (RT, error)) (T, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return T(0), err
 	}
@@ -33,7 +33,7 @@ func toIntType[T intType, RT int64 | uint64](varName string, bitSize int, conver
 // environment variable is not found or the conversion to
 // type []T fails.
 func toIntSliceType[T intType, RT int64 | uint64](varName string, separator string, bitSize int, conversionFunc func(string, int, int) (RT, error)) ([]T, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return []T{}, err
 	}

@@ -7,10 +7,10 @@ import "strings"
 // returned if the environment variable is not found.
 //
 // This function is a convenience wrapper around
-// LoadFromEnvironment, for the sake of pattern
+// loadFromEnvironment, for the sake of pattern
 // consistency.
 func ToString(varName string) (string, error) {
-	return LoadFromEnvironment(varName, true)
+	return loadFromEnvironment(varName, true)
 }
 
 // ToString returns the value of the requested environment variable
@@ -19,7 +19,7 @@ func ToString(varName string) (string, error) {
 // environment variable is not found or the conversion to a
 // slice of strings fails.
 func ToStringSlice(varName string, separator string) ([]string, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return []string{}, err
 	}
@@ -33,10 +33,10 @@ func ToStringSlice(varName string, separator string) ([]string, error) {
 // environment variable is not found.
 //
 // This function is a convenience wrapper around
-// LoadFromEnvironmentWithDefault, for the sake
+// loadFromEnvironmentWithDefault, for the sake
 // of pattern consistency.
 func ToStringWithDefault(varName string, defaultValue string) string {
-	return LoadFromEnvironmentWithDefault(varName, defaultValue)
+	return loadFromEnvironmentWithDefault(varName, defaultValue)
 }
 
 // ToString returns the value of the requested environment variable

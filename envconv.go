@@ -13,7 +13,7 @@
 //
 // The package currently has support for converting to int, int8,
 // int16, int32, int63, uint, uint8, uint16, uint32, uint64,
-// bool, byte, string and time.Duration.
+// float32, float64, bool, byte, string and time.Duration.
 //
 // You can also convert to a slice of any of the available types.
 package envconv
@@ -27,7 +27,7 @@ import (
 // An error is returned  if that variable is not set or (assuming the
 // allowEmpty parameter is set to false), the loaded environment
 // variable  is empty.
-func LoadFromEnvironment(varName string, allowEmpty bool) (string, error) {
+func loadFromEnvironment(varName string, allowEmpty bool) (string, error) {
 	val, ok := os.LookupEnv(varName)
 	if !ok {
 		return "", errors.New("unknown environment variable")
@@ -41,8 +41,8 @@ func LoadFromEnvironment(varName string, allowEmpty bool) (string, error) {
 // LoadFromEvironmentWithDefault returns the value of the requested environment variable.
 // A default value is returned if that variable is not set or the loaded environment
 // variable  is empty.
-func LoadFromEnvironmentWithDefault(varName string, defaultValue string) string {
-	val, err := LoadFromEnvironment(varName, true)
+func loadFromEnvironmentWithDefault(varName string, defaultValue string) string {
+	val, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return defaultValue
 	}

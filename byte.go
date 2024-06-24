@@ -7,7 +7,7 @@ import "strconv"
 // environment variable is not found or the conversion to
 // byte fails.
 func ToByte(varName string) (byte, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return byte(0), err
 	}
@@ -25,7 +25,7 @@ func ToByte(varName string) (byte, error) {
 // converted to a byte slice. An error will be returned if the
 // environment variable is not found.
 func ToByteSlice(varName string) ([]byte, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return []byte{}, err
 	}

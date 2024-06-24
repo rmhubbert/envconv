@@ -15,7 +15,7 @@ type floatType interface {
 // environment variable is not found or the conversion to
 // type T fails.
 func toFloatType[T floatType](varName string, bitSize int, conversionFunc func(string, int) (float64, error)) (T, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return T(0), err
 	}
@@ -33,7 +33,7 @@ func toFloatType[T floatType](varName string, bitSize int, conversionFunc func(s
 // environment variable is not found or the conversion to
 // type []T fails.
 func toFloatSliceType[T floatType](varName string, separator string, bitSize int, conversionFunc func(string, int) (float64, error)) ([]T, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return []T{}, err
 	}

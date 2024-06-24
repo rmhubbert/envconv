@@ -4,46 +4,18 @@ import (
 	"os"
 	"testing"
 
-	"github.com/rmhubbert/envconv"
 	"github.com/stretchr/testify/assert"
 )
 
-type EnvTest struct {
-	env           string
-	value         string
-	errorExpected bool
-}
-
-func TestLoadFromEnvironment(t *testing.T) {
-	testData := []EnvTest{
-		{"ENV_TEST_HELLO", "hello", false},
-		{"ENV_TEST_HELLO_WORLD", "hello world", false},
-		{"ENV_TEST_HELLO__NEWLINE_WORLD", "hello\nworld", false},
-	}
-
-	for _, td := range testData {
-		t.Run(td.env, func(t *testing.T) {
-			os.Setenv(td.env, td.value)
-			v, err := envconv.LoadFromEnvironment(td.env, true)
-			if td.errorExpected {
-				assert.Error(t, err, "there should be an error")
-			} else {
-				assert.NoError(t, err, "there should be no error")
-			}
-			assert.Equal(t, td.value, v, "they should be equal")
-		})
-	}
-}
-
-// TestReturnValueType is a type constraint interface that is used by the run* generic
+// testReturnValueType is a type constraint interface that is used by the run* generic
 // test functions
-type TestReturnValueType interface {
+type testReturnValueType interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64
 }
 
 // runTest provides a generic test run for the convertor function types that
 // take a single string and return a T and an error
-func runTest[T TestReturnValueType, F func(string) (T, error)](
+func runTest[T testReturnValueType, F func(string) (T, error)](
 	t *testing.T,
 	env string,
 	value string,
@@ -65,7 +37,7 @@ func runTest[T TestReturnValueType, F func(string) (T, error)](
 
 // runEmptyTest provides a generic test run for testing an empty environment
 // variable on convertor function types that retun an error.
-func runEmptyTest[T TestReturnValueType, F func(string) (T, error)](t *testing.T, expected T, handler F) {
+func runEmptyTest[T testReturnValueType, F func(string) (T, error)](t *testing.T, expected T, handler F) {
 	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
 		v, err := handler("TEST_NON_EXISTANT")
 		assert.Error(t, err, "there should be an error")
@@ -75,7 +47,7 @@ func runEmptyTest[T TestReturnValueType, F func(string) (T, error)](t *testing.T
 
 // runWithDefaultTest provides a generic test run for the convertor function
 // types that return a default value.
-func runWithDefaultTest[T TestReturnValueType, F func(string, T) T](
+func runWithDefaultTest[T testReturnValueType, F func(string, T) T](
 	t *testing.T,
 	env string,
 	value string,
@@ -97,7 +69,7 @@ func runWithDefaultTest[T TestReturnValueType, F func(string, T) T](
 // runWithDefaultEmptyTest provides a generic test run for testing an empty
 // environment variable on convertor function types that retun a default
 // value.
-func runWithDefaultEmptyTest[T TestReturnValueType, F func(string, T) T](t *testing.T, expected T, handler F) {
+func runWithDefaultEmptyTest[T testReturnValueType, F func(string, T) T](t *testing.T, expected T, handler F) {
 	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
 		v := handler("TEST_NON_EXISTANT", expected)
 		assert.Equal(t, expected, v, "they should be equal")
@@ -106,7 +78,7 @@ func runWithDefaultEmptyTest[T TestReturnValueType, F func(string, T) T](t *test
 
 // runWithDefaultTest provides a generic test run for the convertor function
 // types that return a default value.
-func runSliceTest[T TestReturnValueType, F func(string, string) ([]T, error)](
+func runSliceTest[T testReturnValueType, F func(string, string) ([]T, error)](
 	t *testing.T,
 	env string,
 	value string,
@@ -129,7 +101,7 @@ func runSliceTest[T TestReturnValueType, F func(string, string) ([]T, error)](
 
 // runSliceEmptyTest provides a generic test run for testing an empty environment
 // variable on convertor function types that return a an error.
-func runSliceEmptyTest[T TestReturnValueType, F func(string, string) ([]T, error)](t *testing.T, separator string, expected []T, handler F) {
+func runSliceEmptyTest[T testReturnValueType, F func(string, string) ([]T, error)](t *testing.T, separator string, expected []T, handler F) {
 	t.Run("TEST_NON_EXISTANT does not exist", func(t *testing.T) {
 		v, err := handler("TEST_NON_EXISTANT", separator)
 		assert.Error(t, err, "there should be an error")
@@ -139,7 +111,7 @@ func runSliceEmptyTest[T TestReturnValueType, F func(string, string) ([]T, error
 
 // runSliceWithDefaultTest provides a generic test run for the convertor function
 // types that return a default value.
-func runSliceWithDefaultTest[T TestReturnValueType, F func(string, string, []T) []T](
+func runSliceWithDefaultTest[T testReturnValueType, F func(string, string, []T) []T](
 	t *testing.T,
 	env string,
 	value string,
@@ -163,7 +135,7 @@ func runSliceWithDefaultTest[T TestReturnValueType, F func(string, string, []T) 
 // runSliceWithDefaultEmptyTest provides a generic test run for testing an empty
 // environment variable on convertor function types that retun a default
 // value.
-func runSliceWithDefaultEmptyTest[T TestReturnValueType, F func(string, string, []T) []T](
+func runSliceWithDefaultEmptyTest[T testReturnValueType, F func(string, string, []T) []T](
 	t *testing.T,
 	separator string,
 	expected []T,

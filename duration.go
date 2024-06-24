@@ -20,7 +20,7 @@ func convertDuration(value string) (time.Duration, error) {
 // environment variable is not found or the conversion to
 // time.Duration fails.
 func ToDuration(varName string) (time.Duration, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return 0, err
 	}
@@ -32,7 +32,7 @@ func ToDuration(varName string) (time.Duration, error) {
 // if the environment variable is not found or the conversion to
 // time.Duration fails.
 func ToDurationSlice(varName string, separator string) ([]time.Duration, error) {
-	value, err := LoadFromEnvironment(varName, true)
+	value, err := loadFromEnvironment(varName, true)
 	if err != nil {
 		return []time.Duration{}, err
 	}
