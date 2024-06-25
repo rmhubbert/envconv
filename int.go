@@ -115,7 +115,7 @@ func ToInt8(varName string) (int8, error) {
 	return toIntType[int8](varName, 8, strconv.ParseInt)
 }
 
-// ToIntSlice returns the value of the requested environment variable
+// ToInt8Slice returns the value of the requested environment variable
 // converted to a slice of int8s. An error will be returned if the
 // environment variable is not found or the conversion to
 // slice of int8s fails.
