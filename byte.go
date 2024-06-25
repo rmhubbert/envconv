@@ -2,7 +2,7 @@ package envconv
 
 import "strconv"
 
-// ToByteSlice returns the value of the requested environment variable
+// ToByte returns the value of the requested environment variable
 // converted to a byte. An error will be returned if the
 // environment variable is not found or the conversion to
 // byte fails.

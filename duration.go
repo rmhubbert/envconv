@@ -27,7 +27,7 @@ func ToDuration(varName string) (time.Duration, error) {
 	return convertDuration(value)
 }
 
-// ToDuration returns the value of the requested environment variable
+// ToDurationSlice returns the value of the requested environment variable
 // converted to a slice of time.Durations. An error will be returned
 // if the environment variable is not found or the conversion to
 // time.Duration fails.
