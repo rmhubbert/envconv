@@ -12,8 +12,8 @@ func ToByte(varName string) (byte, error) {
 		return byte(0), err
 	}
 
-	var convertedValue int64
-	convertedValue, err = strconv.ParseInt(value, 10, 8)
+	var convertedValue uint64
+	convertedValue, err = strconv.ParseUint(value, 10, 8)
 	if err != nil {
 		return byte(0), err
 	}

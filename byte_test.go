@@ -15,13 +15,11 @@ func TestToByte(t *testing.T) {
 		expected      byte
 		errorExpected bool
 	}{
-		{"TEST_BYTE_1", "-128", 128, false},
-		{"TEST_BYTE_1", "-129", 0, true},
-		{"TEST_BYTE_1", "-1", 255, false},
+		{"TEST_BYTE_1", "-1", 0, true},
 		{"TEST_BYTE_0", "0", 0, false},
 		{"TEST_BYTE_1", "1", 1, false},
-		{"TEST_BYTE_127", "127", 127, false},
-		{"TEST_BYTE_128", "128", 0, true},
+		{"TEST_BYTE_127", "255", 255, false},
+		{"TEST_BYTE_128", "256", 0, true},
 	}
 
 	for _, td := range testData {
@@ -81,13 +79,11 @@ func TestToByteWithDefault(t *testing.T) {
 		expected     byte
 		defaultValue byte
 	}{
-		{"TEST_BYTE_1", "-128", 128, 105},
-		{"TEST_BYTE_1", "-129", 0, 105},
-		{"TEST_BYTE_1", "-1", 255, 105},
-		{"TEST_BYTE_0", "0", 0, 105},
-		{"TEST_BYTE_1", "1", 1, 105},
-		{"TEST_BYTE_127", "127", 127, 105},
-		{"TEST_BYTE_128", "128", 0, 105},
+		{"TEST_BYTE_WITH_DEFAULT_1", "-1", 0, 105},
+		{"TEST_BYTE_WITH_DEFAULT_0", "0", 0, 105},
+		{"TEST_BYTE_WITH_DEFAULT_1", "1", 1, 105},
+		{"TEST_BYTE_WITH_DEFAULT_255", "255", 255, 105},
+		{"TEST_BYTE_WITH_DEFAULT_256", "256", 0, 105},
 	}
 
 	for _, td := range testData {
